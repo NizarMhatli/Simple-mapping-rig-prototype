@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="jig" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include all components -->
+  <xacro:include filename="$(find jig_description)/urdf/base.urdf.xacro"/>
+  <xacro:include filename="$(find jig_description)/urdf/lidar.urdf.xacro"/>
+  <xacro:include filename="$(find jig_description)/urdf/gazebo_components.urdf.xacro"/>
+
+</robot>

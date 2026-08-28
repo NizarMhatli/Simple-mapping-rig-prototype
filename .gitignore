@@ -1,0 +1,26 @@
+# ROS 2 build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Docker
+*.tar.gz
+
+# Maps (large files)
+maps/
+
+# Bash history
+config/.bash_history
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LIDAR PARAMETERS
+  ═══════════════════════════════════════════════════════════ -->
+
+  <xacro:property name="lidar_xyz"         value="0.021 -0.12 0.00"/>
+  <xacro:property name="lidar_rpy"         value="0 0 0"/>
+  
+  <!-- ═══════════════════════════════════════════════════════════
+       LIDAR LINK (MID360 with built-in IMU)
+  ═══════════════════════════════════════════════════════════ -->
+
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jig_description/meshes/mid360.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0.0 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jig_description/meshes/mid360.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.001" ixy="0" ixz="0"
+               iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LIDAR JOINT
+  ═══════════════════════════════════════════════════════════ -->
+
+  <joint name="base_to_lidar" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="${lidar_xyz}" rpy="${lidar_rpy}"/>
+  </joint>
+
+</robot>

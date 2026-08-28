@@ -1,7 +1,7 @@
 services:
   ros2-jazzy:
     build: .
-    container_name: ros2-jazzy-tutorials
+    container_name: Simple-mapping-jig-prototype
     network_mode: host
     privileged: true
     environment:

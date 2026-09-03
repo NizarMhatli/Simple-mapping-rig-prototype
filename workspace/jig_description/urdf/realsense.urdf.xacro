@@ -2,21 +2,21 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR PARAMETERS
+       REALSENSE PARAMETERS
   ═══════════════════════════════════════════════════════════ -->
 
-  <xacro:property name="lidar_xyz"         value="0.025 -0.005 0.035"/>
-  <xacro:property name="lidar_rpy"         value="0 1.57 0"/>
+  <xacro:property name="lidar_xyz"         value="0.050 -0.001 -0.01"/>
+  <xacro:property name="lidar_rpy"         value="0 0 0"/>
   
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR LINK (MID360 with built-in IMU)
+       REALSENSE LINK 
   ═══════════════════════════════════════════════════════════ -->
 
-  <link name="lidar_link">
+  <link name="camera_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://jig_description/meshes/mid360.stl"
+        <mesh filename="package://jig_description/meshes/realsense.stl"
               scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="red">
@@ -26,7 +26,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://jig_description/meshes/mid360.stl"
+        <mesh filename="package://jig_description/meshes/realsense.stl"
               scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
@@ -39,12 +39,12 @@
   </link>
 
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR JOINT
+       REALSENSE JOINT
   ═══════════════════════════════════════════════════════════ -->
 
-  <joint name="base_to_lidar" type="fixed">
+  <joint name="base_to_camera" type="fixed">
     <parent link="base_link"/>
-    <child link="lidar_link"/>
+    <child link="camera_link"/>
     <origin xyz="${lidar_xyz}" rpy="${lidar_rpy}"/>
   </joint>
 

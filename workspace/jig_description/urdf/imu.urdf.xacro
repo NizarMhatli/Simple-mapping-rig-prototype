@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- IMU is built into the MID360 LiDAR — see lidar.urdf.xacro -->
-</robot>

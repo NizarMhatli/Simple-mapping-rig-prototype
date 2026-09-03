@@ -4,6 +4,7 @@
   <!-- Include all components -->
   <xacro:include filename="$(find jig_description)/urdf/base.urdf.xacro"/>
   <xacro:include filename="$(find jig_description)/urdf/lidar.urdf.xacro"/>
+  <xacro:include filename="$(find jig_description)/urdf/realsense.urdf.xacro"/>
   <xacro:include filename="$(find jig_description)/urdf/gazebo_components.urdf.xacro"/>
 
 </robot>

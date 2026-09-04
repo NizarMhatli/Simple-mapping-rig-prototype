@@ -53,14 +53,14 @@ def generate_launch_description():
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            arguments=['0.021', '-0.12', '0.00', '0', '0', '0',
+            arguments=['0.1', '-0.005', '0.035', '0', '0', '0',
                     'base_link', 'jig/base_link/lidar_sensor'],
             output='screen'
         ),
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            arguments=['0.021', '-0.12', '0.00', '0', '0', '0',
+            arguments=['0.075', '-0.005', '0.040', '0', '0', '0',
                     'base_link', 'jig/base_link/imu_sensor'],
             output='screen'
         ),

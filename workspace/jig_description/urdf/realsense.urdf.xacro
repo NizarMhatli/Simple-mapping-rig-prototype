@@ -2,14 +2,14 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE PARAMETERS
+       REALSENSE D435 PARAMETERS
   ═══════════════════════════════════════════════════════════ -->
 
-  <xacro:property name="lidar_xyz"         value="0.050 -0.001 -0.01"/>
-  <xacro:property name="lidar_rpy"         value="0 0 0"/>
-  
+  <xacro:property name="camera_xyz" value="0.050 -0.001 -0.01"/>
+  <xacro:property name="camera_rpy" value="0 0 0"/>
+
   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE LINK 
+       REALSENSE LINK
   ═══════════════════════════════════════════════════════════ -->
 
   <link name="camera_link">
@@ -19,8 +19,8 @@
         <mesh filename="package://jig_description/meshes/realsense.stl"
               scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="red">
-        <color rgba="0.8 0.0 0.0 1.0"/>
+      <material name="silver">
+        <color rgba="0.7 0.7 0.7 1.0"/>
       </material>
     </visual>
     <collision>
@@ -32,20 +32,29 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.3"/>
+      <mass value="0.072"/>
       <inertia ixx="0.001" ixy="0" ixz="0"
                iyy="0.001" iyz="0" izz="0.001"/>
     </inertial>
   </link>
 
+  <!-- Optical frame for ROS convention (Z forward, X right, Y down) -->
+  <link name="camera_optical_link"/>
+
   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE JOINT
+       REALSENSE JOINTS
   ═══════════════════════════════════════════════════════════ -->
 
   <joint name="base_to_camera" type="fixed">
     <parent link="base_link"/>
     <child link="camera_link"/>
-    <origin xyz="${lidar_xyz}" rpy="${lidar_rpy}"/>
+    <origin xyz="${camera_xyz}" rpy="${camera_rpy}"/>
+  </joint>
+
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
   </joint>
 
 </robot>

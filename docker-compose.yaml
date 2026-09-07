@@ -1,27 +1,23 @@
 services:
   ros2-jazzy:
     build: .
-    container_name: Simple-mapping-jig-prototype
+    container_name: simple-mapping-jig
     network_mode: host
     privileged: true
+    runtime: nvidia
     environment:
       - DISPLAY=${DISPLAY}
       - ROS_DOMAIN_ID=0
       - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all,graphics,display
     volumes:
-      # Your ROS 2 packages — persisted on host
       - ./workspace:/ros2_ws/src
-      # Saved maps
-      - ./maps:/ros2_ws/maps
       - ./build:/ros2_ws/build
       - ./install:/ros2_ws/install
       - ./log:/ros2_ws/log
-      # Bash history persists between sessions
+      - ./maps:/ros2_ws/maps
       - ./config/.bash_history:/root/.bash_history
-      # GUI support for RViz
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      # Device access
       - /dev:/dev
     stdin_open: true
     tty: true

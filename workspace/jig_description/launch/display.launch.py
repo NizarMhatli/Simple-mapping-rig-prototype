@@ -64,7 +64,50 @@ def generate_launch_description():
                     'base_link', 'jig/base_link/imu_sensor'],
             output='screen'
         ),
-        # RViz
+        # In display.launch.py, add these alongside existing static_transform_publishers
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0.05', '-0.001', '-0.01',  # camera_xyz
+                    '0', '0', '0', '1',
+                    'base_link', 'camera_bottom_screw_frame'],
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0.0175', '0.0125',
+                    '0', '0', '0', '1',
+                    'camera_bottom_screw_frame', 'camera_link'],
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0',
+                    '0', '0', '0', '1',
+                    'camera_link', 'camera_depth_frame'],
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0.015', '0',
+                    '0', '0', '0', '1',
+                    'camera_link', 'camera_color_frame'],
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0',
+                    '0', '0', '0', '1',
+                    'base_link', 'jig/base_link/depth_camera'],
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0',
+                    '0', '0', '0', '1',
+                    'base_link', 'jig/base_link/rgb_camera'],
+        ),
+                # RViz
         Node(
             package='rviz2',
             executable='rviz2',

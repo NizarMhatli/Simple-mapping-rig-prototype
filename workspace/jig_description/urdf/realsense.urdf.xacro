@@ -5,29 +5,26 @@
        REALSENSE D435 PARAMETERS
   ═══════════════════════════════════════════════════════════ -->
 
-  <xacro:property name="camera_xyz" value="0.050 -0.001 -0.01"/>
+  <xacro:property name="camera_xyz" value="0.065 -0.015 -0.01"/>
   <xacro:property name="camera_rpy" value="0 0 0"/>
 
   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE LINK
+       REALSENSE LINKS
   ═══════════════════════════════════════════════════════════ -->
+
+  <link name="camera_bottom_screw_frame"/>
 
   <link name="camera_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
       <geometry>
-        <mesh filename="package://jig_description/meshes/realsense.stl"
-              scale="0.001 0.001 0.001"/>
+        <mesh filename="file://$(find realsense2_description)/meshes/d435.dae"/>
       </geometry>
-      <material name="silver">
-        <color rgba="0.7 0.7 0.7 1.0"/>
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://jig_description/meshes/realsense.stl"
-              scale="0.001 0.001 0.001"/>
+        <box size="0.025 0.090 0.025"/>
       </geometry>
     </collision>
     <inertial>
@@ -38,8 +35,10 @@
     </inertial>
   </link>
 
-  <!-- Optical frame for ROS convention (Z forward, X right, Y down) -->
-  <link name="camera_optical_link"/>
+  <link name="camera_depth_frame"/>
+  <link name="camera_depth_optical_frame"/>
+  <link name="camera_color_frame"/>
+  <link name="camera_color_optical_frame"/>
 
   <!-- ═══════════════════════════════════════════════════════════
        REALSENSE JOINTS
@@ -47,13 +46,37 @@
 
   <joint name="base_to_camera" type="fixed">
     <parent link="base_link"/>
-    <child link="camera_link"/>
+    <child link="camera_bottom_screw_frame"/>
     <origin xyz="${camera_xyz}" rpy="${camera_rpy}"/>
   </joint>
 
-  <joint name="camera_optical_joint" type="fixed">
+  <joint name="camera_link_joint" type="fixed">
+    <parent link="camera_bottom_screw_frame"/>
+    <child link="camera_link"/>
+    <origin xyz="0 0.0175 0.0125" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="camera_depth_joint" type="fixed">
     <parent link="camera_link"/>
-    <child link="camera_optical_link"/>
+    <child link="camera_depth_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="camera_depth_optical_joint" type="fixed">
+    <parent link="camera_depth_frame"/>
+    <child link="camera_depth_optical_frame"/>
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+  </joint>
+
+  <joint name="camera_color_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_color_frame"/>
+    <origin xyz="0 0.015 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="camera_color_optical_joint" type="fixed">
+    <parent link="camera_color_frame"/>
+    <child link="camera_color_optical_frame"/>
     <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
   </joint>
 

@@ -36,7 +36,7 @@ Jetson Orin (real hardware)          Host PC (Ubuntu 24.04)
 Livox MID360 LiDAR + IMU             ROS 2 Jazzy Docker
 RealSense D435 (USB3)       ──────── RViz2 visualization
 ROS 2 Humble                         Gazebo Harmonic simulation
-ROS_DOMAIN_ID=42                     ROS_DOMAIN_ID=42
+ROS_DOMAIN_ID=55                     ROS_DOMAIN_ID=55
 ```
 
 ## Sensor Topics

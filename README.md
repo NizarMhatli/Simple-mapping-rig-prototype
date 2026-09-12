@@ -85,7 +85,7 @@ This launches both the Livox MID360 and RealSense D435 simultaneously.
 
 ```bash
 # Set domain ID to match Orin
-export ROS_DOMAIN_ID=42
+export ROS_DOMAIN_ID=55
 
 # Topics appear automatically via FastDDS discovery
 ros2 topic list | grep -E "livox|camera"

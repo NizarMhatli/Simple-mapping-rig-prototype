@@ -15,9 +15,8 @@ def generate_launch_description():
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': robot_description}]
+        parameters=[{'robot_description': robot_description}],
+        output='screen'
     )
 
     # ── RViz ──────────────────────────────────────────────────────
@@ -25,59 +24,98 @@ def generate_launch_description():
     rviz = Node(
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
         arguments=['-d', rviz_config],
         output='screen'
     )
 
+    # ── Topic relays ───────────────────────────────────────────────
+    relay_lidar = Node(
+        package='topic_tools',
+        executable='relay',
+        name='relay_lidar',
+        parameters=[{
+            'input_topic': '/livox/lidar',
+            'output_topic': '/scan/points',
+        }],
+        output='screen'
+    )
+
+    relay_imu = Node(
+        package='topic_tools',
+        executable='relay',
+        name='relay_imu',
+        parameters=[{
+            'input_topic': '/livox/imu',
+            'output_topic': '/imu/data_raw',
+        }],
+        output='screen'
+    )
+
+    relay_rgb = Node(
+        package='topic_tools',
+        executable='relay',
+        name='relay_rgb',
+        parameters=[{
+            'input_topic': '/camera/camera/color/image_raw',
+            'output_topic': '/camera/color/image_raw',
+        }],
+        output='screen'
+    )
+
+    relay_depth = Node(
+        package='topic_tools',
+        executable='relay',
+        name='relay_depth',
+        parameters=[{
+            'input_topic': '/camera/camera/depth/image_rect_raw',
+            'output_topic': '/camera/depth/image_rect_raw',
+        }],
+        output='screen'
+    )
+
+    relay_depth_points = Node(
+        package='topic_tools',
+        executable='relay',
+        name='relay_depth_points',
+        parameters=[{
+            'input_topic': '/camera/camera/depth/color/points',
+            'output_topic': '/camera/depth/points',
+        }],
+        output='screen'
+    )
+
     # ── Static TF: base_link → livox_frame ────────────────────────
-    # Connects real LiDAR frame to jig base
-    # Adjust xyz/rpy to match physical mounting position on jig
     tf_base_to_livox = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='tf_base_to_livox',
         arguments=[
-            '0.021', '-0.12', '0.00',  # lidar_xyz from urdf
-            '0', '0', '0', '1',
+            '0.025', '-0.005', '0.035',
+            '0', '0.7071', '0', '0.7071',
             'base_link', 'livox_frame'
         ]
     )
 
-    # ── Static TF: base_link → lidar_link (for URDF mesh display) ─
-    tf_base_to_lidar_link = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='tf_base_to_lidar_link',
-        arguments=[
-            '0.021', '-0.12', '0.00',
-            '0', '0', '0', '1',
-            'base_link', 'lidar_link'
-        ]
-    )
-
     # ── Static TF: base_link → camera_link ────────────────────────
-    # Connects jig URDF camera_link to real RealSense TF tree
-    tf_base_to_camera_link = Node(
+    tf_base_to_camera = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
-        name='tf_base_to_camera_link',
+        name='tf_base_to_camera',
         arguments=[
-            '0.050', '-0.001', '-0.01',  # camera_xyz from urdf
-            '0', '0', '-1.5707', '1',    # yaw -90° to face +X
+            '0.050', '-0.001', '-0.01',
+            '0', '0', '-0.7071', '0.7071',
             'base_link', 'camera_link'
         ]
     )
 
     # ── Static TF: camera_link → camera_depth_optical_frame ───────
-    # Bridges jig URDF to real RealSense depth frame
     tf_camera_to_depth_optical = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='tf_camera_to_depth_optical',
         arguments=[
             '0', '0', '0',
-            '-0.5', '0.5', '-0.5', '0.5',  # optical frame rotation
+            '-0.5', '0.5', '-0.5', '0.5',
             'camera_link', 'camera_depth_optical_frame'
         ]
     )
@@ -97,9 +135,13 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         rviz,
+        relay_lidar,
+        relay_imu,
+        relay_rgb,
+        relay_depth,
+        relay_depth_points,
         tf_base_to_livox,
-        tf_base_to_lidar_link,
-        tf_base_to_camera_link,
+        tf_base_to_camera,
         tf_camera_to_depth_optical,
         tf_camera_to_color_optical,
     ])

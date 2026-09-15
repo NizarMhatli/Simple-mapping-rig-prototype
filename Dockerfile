@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-realsense2-camera \
     ros-jazzy-realsense2-camera-msgs \
     ros-jazzy-realsense2-description \
+    ros-jazzy-topic-tools \
     mesa-utils \
     libgl1 \
     libglx-mesa0 \

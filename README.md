@@ -23,10 +23,14 @@ The goal of this project is to explore whether a **budget-friendly scanner jig**
 ## Jig Model
 ![Jig Model](media/demo.png)
 
-## Demo
+## Demo in Simulation 
 
 ![RViz](media/rviz.gif)
 ![Gazebo](media/gaz.gif)
+
+## Demo using real Hardware
+
+![RViz Real](media/rviz_real.gif)
 
 ## Architecture
 

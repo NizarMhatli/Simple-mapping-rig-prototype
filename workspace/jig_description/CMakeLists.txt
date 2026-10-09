@@ -26,3 +26,9 @@ install(DIRECTORY urdf config launch meshes worlds rviz
   DESTINATION share/${PROJECT_NAME}
 )
 ament_package()
+
+install(PROGRAMS
+  jig_description/jig_path_motion.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME jig_path_motion
+)

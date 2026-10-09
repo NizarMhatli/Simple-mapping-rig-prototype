@@ -6,6 +6,8 @@
   ═══════════════════════════════════════════════════════════ -->
 
   <gazebo>
+    <static>false</static>
+    <gravity>false</gravity>
     <plugin filename="libgz-sim-sensors-system.so"
             name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>

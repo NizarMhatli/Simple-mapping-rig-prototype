@@ -1,0 +1,52 @@
+# FAST-LIO2 (hku-mars/FAST_LIO, ROS2 branch) config for the Gazebo jig sim.
+# Install to jig_description/config/ and launch with odom_source:=fastlio.
+/**:
+  ros__parameters:
+    feature_extract_enable: false
+    point_filter_num: 2          # keep every 2nd point (sim cloud ~24k pts/scan)
+    max_iteration: 3
+    filter_size_surf: 0.2        # small indoor world -> finer than the 0.5 default
+    filter_size_map: 0.2
+    cube_side_length: 1000.0
+    runtime_pos_log_enable: false
+    map_file_path: "./jig_fastlio_map.pcd"
+
+    common:
+      lid_topic: "/fastlio/points"   # from lidar_to_fastlio (finite points, t = 0)
+      imu_topic: "/imu/data_raw"     # raw IMU, 200 Hz, m/s^2 (FAST-LIO rescales at init)
+      time_sync_en: false
+      time_offset_lidar_to_imu: 0.0
+
+    preprocess:
+      lidar_type: 3              # Ouster handler: reads per-point time from field `t`
+      scan_line: 40              # vertical samples in gazebo_components.urdf.xacro
+      timestamp_unit: 3          # ns (t is always 0 in sim anyway)
+      blind: 0.2                 # m, drop points closer than this (jig self-hits)
+
+    mapping:
+      acc_cov: 0.1
+      gyr_cov: 0.1
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+      fov_degree: 360.0
+      det_range: 40.0            # matches lidar <range><max>
+      extrinsic_est_en: false
+      # Lidar pose in the IMU frame (T_imu_lidar). From lidar.urdf.xacro:
+      # imu_link sits at +[0.011, 0.02329, -0.04412] in lidar_link, no rotation.
+      # Same values as FAST-LIO's own mid360.yaml.
+      extrinsic_T: [-0.011, -0.02329, 0.04412]
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+
+    publish:
+      path_en: true
+      effect_map_en: false
+      map_en: false
+      scan_publish_en: true
+      dense_publish_en: false
+      scan_bodyframe_pub_en: false
+
+    pcd_save:
+      pcd_save_en: false         # RTAB-Map builds the maps; set true to also dump FAST-LIO's PCD
+      interval: -1

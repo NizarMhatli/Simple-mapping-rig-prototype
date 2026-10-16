@@ -1,10 +1,13 @@
-# LiDAR
-- ros_topic_name: "/scan"
-  gz_topic_name: "/scan"
-  ros_type_name: "sensor_msgs/msg/LaserScan"
-  gz_type_name: "gz.msgs.LaserScan"
+# ROS topic names match the real drivers where possible, so the same
+# rtabmap / LIO configs work on sim and hardware.
+
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
 
+# LiDAR (3D). /scan LaserScan dropped: meaningless for a pitched 40-ring lidar.
 - ros_topic_name: "/scan/points"
   gz_topic_name: "/scan/points"
   ros_type_name: "sensor_msgs/msg/PointCloud2"
@@ -18,29 +21,43 @@
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
-# RealSense RGB
+# RealSense (rgbd_camera, depth aligned to color)
 - ros_topic_name: "/camera/color/image_raw"
-  gz_topic_name: "/camera/color/image_raw"
+  gz_topic_name: "/camera/image"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
 
-# RealSense Depth image
-- ros_topic_name: "/camera/depth/image_rect_raw"
-  gz_topic_name: "/camera/depth/image_rect_raw"
+- ros_topic_name: "/camera/aligned_depth_to_color/image_raw"
+  gz_topic_name: "/camera/depth_image"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
 
-# RealSense PointCloud — note gz topic name matches what Gazebo actually publishes
+- ros_topic_name: "/camera/color/camera_info"
+  gz_topic_name: "/camera/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
+# Point cloud from the dedicated depth_cloud sensor (frame camera_color_frame)
 - ros_topic_name: "/camera/depth/points"
-  gz_topic_name: "/camera/depth/image_rect_raw/points"
+  gz_topic_name: "/camera/cloud/points"
   ros_type_name: "sensor_msgs/msg/PointCloud2"
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "/clock"
-  gz_topic_name: "/clock"
-  ros_type_name: "rosgraph_msgs/msg/Clock"
-  gz_type_name: "gz.msgs.Clock"
+# Velocity commands from jig_path_motion.py
+- ros_topic_name: "/model/jig/cmd_vel"
+  gz_topic_name: "/model/jig/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+# Ground truth (used by jig_path_motion for feedback, and for evaluation — NOT bridged to /tf here;
+# mapping.launch.py bridges the TF only when odom_source:=gt)
+- ros_topic_name: "/ground_truth/odom"
+  gz_topic_name: "/model/jig/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
   direction: GZ_TO_ROS

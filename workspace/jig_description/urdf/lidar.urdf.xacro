@@ -2,14 +2,19 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR PARAMETERS
+       LIDAR PARAMETERS  (single source of truth for the lidar pose)
   ═══════════════════════════════════════════════════════════ -->
 
-  <xacro:property name="lidar_xyz"         value="0.025 -0.005 0.035"/>
-  <xacro:property name="lidar_rpy"         value="0 1.57 0"/>
-  
+  <xacro:property name="lidar_xyz" value="0.025 -0.005 0.035"/>
+  <xacro:property name="lidar_rpy" value="0 ${pi/2} 0"/>
+
+  <!-- MID360 internal IMU position in the lidar frame.
+       From FAST-LIO mid360.yaml (extrinsic_T = -0.011 -0.02329 0.04412 is
+       lidar-in-IMU, so IMU-in-lidar is the negation). Verify vs. Livox datasheet. -->
+  <xacro:property name="imu_in_lidar_xyz" value="0.011 0.02329 -0.04412"/>
+
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR LINK (MID360 with built-in IMU)
+       LIDAR LINK (MID360)
   ═══════════════════════════════════════════════════════════ -->
 
   <link name="lidar_link">
@@ -23,29 +28,38 @@
         <color rgba="0.8 0.0 0.0 1.0"/>
       </material>
     </visual>
+    <!-- Simple primitive collision: cheaper than the STL and avoids
+         self-hits from a detailed mesh -->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://jig_description/meshes/mid360.stl"
-              scale="0.001 0.001 0.001"/>
+        <cylinder radius="0.033" length="0.06"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.3"/>
-      <inertia ixx="0.001" ixy="0" ixz="0"
-               iyy="0.001" iyz="0" izz="0.001"/>
+      <mass value="0.265"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
     </inertial>
   </link>
-
-  <!-- ═══════════════════════════════════════════════════════════
-       LIDAR JOINT
-  ═══════════════════════════════════════════════════════════ -->
 
   <joint name="base_to_lidar" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
     <origin xyz="${lidar_xyz}" rpy="${lidar_rpy}"/>
+  </joint>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       IMU LINK (MID360 built-in IMU)
+  ═══════════════════════════════════════════════════════════ -->
+
+  <link name="imu_link"/>
+
+  <joint name="lidar_to_imu" type="fixed">
+    <parent link="lidar_link"/>
+    <child link="imu_link"/>
+    <origin xyz="${imu_in_lidar_xyz}" rpy="0 0 0"/>
   </joint>
 
 </robot>

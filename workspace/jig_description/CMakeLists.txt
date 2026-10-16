@@ -13,22 +13,34 @@ find_package(robot_state_publisher REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+# Data: URDF, configs (gz_bridge.yaml, fast_lio_sim.yaml), launch, meshes, worlds, rviz
 install(DIRECTORY urdf config launch meshes worlds rviz
   DESTINATION share/${PROJECT_NAME}
 )
-ament_package()
 
+# Python nodes: one install() per script, because RENAME only works on a single file.
+# The RENAME value is the executable name used in mapping.launch.py.
 install(PROGRAMS
   jig_description/jig_path_motion.py
   DESTINATION lib/${PROJECT_NAME}
   RENAME jig_path_motion
 )
+install(PROGRAMS
+  jig_description/lidar_to_fastlio.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME lidar_to_fastlio
+)
+
+# Godot export tools (not ROS nodes): run with `ros2 run jig_description export_maps.sh`
+install(PROGRAMS
+  jig_description/export_maps.sh
+  jig_description/map_to_godot.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+ament_package()   # keep this last

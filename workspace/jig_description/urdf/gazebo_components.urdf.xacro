@@ -2,137 +2,143 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ═══════════════════════════════════════════════════════════
-       GAZEBO SYSTEM PLUGINS
+       MODEL-LEVEL SYSTEMS
+       (Sensors/Imu systems could also live in the world SDF instead)
   ═══════════════════════════════════════════════════════════ -->
+
+  <!-- Gravity is a LINK property in SDF (a model-level <gravity> is ignored,
+       so the jig was really falling and the IMU read ~0 = free fall).
+       All fixed-joint children are lumped into base_link, so this covers the
+       whole jig. The IMU still reports world gravity (+9.81 m/s^2 up). -->
+  <gazebo reference="base_link">
+    <gravity>false</gravity>
+  </gazebo>
 
   <gazebo>
     <static>false</static>
-    <gravity>false</gravity>
+
     <plugin filename="libgz-sim-sensors-system.so"
             name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
+
     <plugin filename="libgz-sim-imu-system.so"
-            name="gz::sim::systems::Imu">
+            name="gz::sim::systems::Imu"/>
+
+    <!-- Ground-truth odometry: for evaluation (evo) and for the
+         odom_source:=gt debug mode in mapping.launch.py -->
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_topic>/model/jig/odometry</odom_topic>
+      <tf_topic>/model/jig/odom_tf</tf_topic>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>3</dimensions>
+    </plugin>
+
+    <!-- Body-frame velocity commands from jig_path_motion.py
+         (replaces set_pose teleporting so the IMU sees real motion) -->
+    <plugin filename="gz-sim-velocity-control-system"
+            name="gz::sim::systems::VelocityControl">
+      <topic>/model/jig/cmd_vel</topic>
     </plugin>
   </gazebo>
 
   <!-- ═══════════════════════════════════════════════════════════
-       LIDAR SENSOR (MID360)
+       LIDAR (Livox MID360 approximation)
+       Real: 360° H, -7°..+52° V, 0.1–40 m (@10% refl.), ≤2 cm, 10 Hz, ~200k pts/s
+       Note: Gazebo uses a repetitive scan pattern and no per-point time,
+       so keep deskewing disabled in sim.
   ═══════════════════════════════════════════════════════════ -->
 
   <gazebo reference="lidar_link">
     <sensor name="lidar_sensor" type="gpu_lidar">
+      <gz_frame_id>lidar_link</gz_frame_id>
       <always_on>true</always_on>
       <update_rate>10</update_rate>
       <topic>/scan</topic>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <lidar>
         <scan>
           <horizontal>
-            <samples>420</samples>
+            <samples>600</samples>
             <resolution>1</resolution>
-            <min_angle>-3.1415</min_angle>
-            <max_angle>3.1415</max_angle>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.13112</max_angle> <!-- π - one step: no duplicate column -->
           </horizontal>
           <vertical>
             <samples>40</samples>
             <resolution>1</resolution>
-            <min_angle>0</min_angle>
-            <max_angle>0.6109</max_angle>
+            <min_angle>-0.12217</min_angle> <!-- -7° -->
+            <max_angle>0.90757</max_angle>  <!-- +52° -->
           </vertical>
         </scan>
         <range>
-          <min>0.2</min>
-          <max>150</max>
-          <resolution>0.05</resolution>
+          <min>0.1</min>
+          <max>40.0</max>
+          <resolution>0.01</resolution>
         </range>
         <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
-          <stddev>0.01</stddev>
+          <stddev>0.02</stddev>
         </noise>
       </lidar>
     </sensor>
+  </gazebo>
 
-    <!-- ═══════════════════════════════════════════════════════
-         IMU SENSOR (built into MID360)
-    ═══════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════
+       IMU (MID360 built-in, ICM40609-class)
+       If you want the sim to mirror the real Spresense setup instead,
+       drop update_rate to ~22 Hz and tune noise to that IMU.
+  ═══════════════════════════════════════════════════════════ -->
 
+  <gazebo reference="imu_link">
     <sensor name="imu_sensor" type="imu">
+      <gz_frame_id>imu_link</gz_frame_id>
       <always_on>true</always_on>
       <update_rate>200</update_rate>
       <topic>/imu/data_raw</topic>
       <imu>
         <angular_velocity>
-          <x>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
-            </noise>
-          </x>
-          <y>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
-            </noise>
-          </y>
-          <z>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
-            </noise>
-          </z>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev>
+            <bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev>
+            <bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev>
+            <bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></z>
         </angular_velocity>
         <linear_acceleration>
-          <x>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
-              <bias_stddev>0.001</bias_stddev>
-            </noise>
-          </x>
-          <y>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
-              <bias_stddev>0.001</bias_stddev>
-            </noise>
-          </y>
-          <z>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
-              <bias_stddev>0.001</bias_stddev>
-            </noise>
-          </z>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev>
+            <bias_mean>0.01</bias_mean><bias_stddev>0.001</bias_stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev>
+            <bias_mean>0.01</bias_mean><bias_stddev>0.001</bias_stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev>
+            <bias_mean>0.01</bias_mean><bias_stddev>0.001</bias_stddev></noise></z>
         </linear_acceleration>
       </imu>
-      <plugin filename="libgz-sim-imu-system.so"
-              name="gz::sim::systems::Imu">
-      </plugin>
+      <!-- no <plugin> here: the Imu system is loaded once at model level -->
     </sensor>
   </gazebo>
 
-   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE D435 — RGB CAMERA
+  <!-- ═══════════════════════════════════════════════════════════
+       REALSENSE D435 — single RGB-D sensor (depth aligned to color,
+       same as the real driver with align_depth.enable:=true)
+       Publishes: /camera/image, /camera/depth_image,
+                  /camera/points, /camera/camera_info
   ═══════════════════════════════════════════════════════════ -->
 
   <gazebo reference="camera_color_frame">
-    <sensor name="rgb_camera" type="camera">
+    <sensor name="rgbd_camera" type="rgbd_camera">
+      <!-- Images must be stamped in the optical frame (z forward).
+           Its /camera/points output is x-forward data and is NOT bridged;
+           the cloud comes from the depth_cloud sensor below instead. -->
+      <gz_frame_id>camera_color_optical_frame</gz_frame_id>
       <always_on>true</always_on>
-      <update_rate>30</update_rate>
-      <topic>/camera/color/image_raw</topic>
-      <visualize>true</visualize>
+      <update_rate>15</update_rate>
+      <topic>/camera</topic>
+      <visualize>false</visualize>
       <camera>
         <horizontal_fov>1.2112</horizontal_fov>
         <image>
@@ -141,8 +147,8 @@
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>0.1</near>
-          <far>100</far>
+          <near>0.2</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -154,32 +160,41 @@
   </gazebo>
 
   <!-- ═══════════════════════════════════════════════════════════
-       REALSENSE D435 — DEPTH CAMERA
+       REALSENSE D435 — POINT CLOUD
+       Gazebo writes cloud XYZ in the link convention (x fwd, y left, z up),
+       so this sensor is stamped with camera_color_frame (same convention)
+       instead of the optical frame. Same pose, FOV and resolution as the
+       RGB-D sensor above, so the cloud is spatially aligned with the image
+       (organized 640x480: point (u,v) <-> pixel (u,v)). TF handles the
+       camera_color_frame -> camera_color_optical_frame rotation.
+       Publishes: /camera/cloud (depth, unused), /camera/cloud/points
   ═══════════════════════════════════════════════════════════ -->
 
-  <gazebo reference="camera_depth_frame">
-    <sensor name="depth_camera" type="depth_camera">
+  <gazebo reference="camera_color_frame">
+    <sensor name="depth_cloud" type="depth_camera">
+      <gz_frame_id>camera_color_frame</gz_frame_id>
       <always_on>true</always_on>
-      <update_rate>30</update_rate>
-      <topic>/camera/depth/image_rect_raw</topic>
-      <visualize>true</visualize>
+      <update_rate>15</update_rate>
+      <topic>/camera/cloud</topic>
+      <visualize>false</visualize>
       <camera>
-        <horizontal_fov>1.4835</horizontal_fov>
+        <horizontal_fov>1.2112</horizontal_fov>
         <image>
           <width>640</width>
           <height>480</height>
           <format>R_FLOAT32</format>
         </image>
         <clip>
-          <near>0.1</near>
+          <near>0.2</near>
           <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
-          <stddev>0.01</stddev>
+          <stddev>0.007</stddev>
         </noise>
       </camera>
     </sensor>
   </gazebo>
-  </robot>
+
+</robot>
